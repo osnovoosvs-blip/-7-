@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Проект залит архивом -> распаковываем
+      - name: Unpack zip archives (if pom.xml is missing)
+        run: |
+          if [ -z "$(find . -name pom.xml -not -path './.git/*' | head -n 1)" ]; then
+            mkdir -p _unpacked
+            find . -
